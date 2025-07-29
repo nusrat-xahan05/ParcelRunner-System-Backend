@@ -5,7 +5,15 @@ export const router = Router();
 // const moduleRoutes = [
 //     {
 //         path: '/user',
-//         route: UserRoute
+//         route: UserRoutes
+//     },
+//     {
+//         path: '/auth',
+//         route: AuthRoutes
+//     },
+//     {
+//         path: '/parcel',
+//         route: ParcelRoutes
 //     }
 // ]
 

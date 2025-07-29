@@ -19,3 +19,52 @@ const startServer = async() => {
 }
 
 startServer();
+
+
+// UNHANDLED REJECTION ERROR:
+process.on("unhandledRejection", (error) => {
+    console.log("Unhandled Rejection Detected... Server Shutting Down. ", error);
+
+    if (server) {
+        server.close(() => {
+            process.exit(1);
+        });
+    }
+    process.exit(1);
+})
+
+// UNCAUGHT EXCEPTION ERROR:
+process.on("uncaughtException", (error) => {
+    console.log("Uncaught Exception Detected... Server Shutting Down. ", error);
+
+    if (server) {
+        server.close(() => {
+            process.exit(1);
+        });
+    }
+    process.exit(1);
+})
+
+// SIGTERM ERROR:
+process.on("SIGTERM", () => {
+    console.log("SIGTERM Signal Received... Server Shutting Down. ");
+
+    if (server) {
+        server.close(() => {
+            process.exit(1);
+        });
+    }
+    process.exit(1);
+})
+
+// SIGINT ERROR:
+process.on("SIGINT", () => {
+    console.log("SIGINT Signal Received... Server Shutting Down. ");
+
+    if (server) {
+        server.close(() => {
+            process.exit(1);
+        });
+    }
+    process.exit(1);
+})
