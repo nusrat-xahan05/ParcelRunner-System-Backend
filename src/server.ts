@@ -23,7 +23,7 @@ startServer();
 
 // UNHANDLED REJECTION ERROR:
 process.on("unhandledRejection", (error) => {
-    console.log("Unhandled Rejection Detected... Server Shutting Down. ", error);
+    console.log("Unhandled Rejection Detected... Server is Shutting Down. ", error);
 
     if (server) {
         server.close(() => {
@@ -35,7 +35,7 @@ process.on("unhandledRejection", (error) => {
 
 // UNCAUGHT EXCEPTION ERROR:
 process.on("uncaughtException", (error) => {
-    console.log("Uncaught Exception Detected... Server Shutting Down. ", error);
+    console.log("Uncaught Exception Detected... Server is Shutting Down. ", error);
 
     if (server) {
         server.close(() => {
@@ -47,7 +47,7 @@ process.on("uncaughtException", (error) => {
 
 // SIGTERM ERROR:
 process.on("SIGTERM", () => {
-    console.log("SIGTERM Signal Received... Server Shutting Down. ");
+    console.log("SIGTERM Signal Received... Server is Shutting Down. ");
 
     if (server) {
         server.close(() => {
@@ -59,7 +59,7 @@ process.on("SIGTERM", () => {
 
 // SIGINT ERROR:
 process.on("SIGINT", () => {
-    console.log("SIGINT Signal Received... Server Shutting Down. ");
+    console.log("SIGINT Signal Received... Server is Shutting Down. ");
 
     if (server) {
         server.close(() => {
