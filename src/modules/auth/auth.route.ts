@@ -2,23 +2,23 @@ import { Router } from "express";
 import { AuthControllers } from "./auth.controller";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "../user/user.interface";
-// import passport from "passport";
+import { validateRequest } from "../../middlewares/validateRequest";
+import { resetPasswordZodSchema } from "./auth.validation";
 
 
 const router = Router()
 
-router.post('/login', AuthControllers.credentialsLogin)
+// USER LOGIN ------
+router.post('/login', AuthControllers.credentialsLogin);
 
-// ????????? CHECK AUTHS e rakhbo?
-router.post('/refresh-token', AuthControllers.getNewAccessToken)
+// CREATE ACCESSTOKEN FROM REFRESH TOKEN ------
+router.post('/refresh-token', checkAuth(...Object.values(Role)), AuthControllers.getNewAccessToken);
 
-router.post('/logout', AuthControllers.logout)
-router.post('/reset-password', checkAuth(...Object.values(Role)), AuthControllers.resetPassword);
-// router.get('/google', (req: Request, res: Response, next: NextFunction) => {
-//     const redirect = req.query.redirect || "/"
-//     passport.authenticate("google", { scope: ["profile", "email"], state: redirect as string })(req, res, next)
-// })
-// router.get('/google/callback', passport.authenticate("google", { failureRedirect: "/login" }), AuthControllers.googleCallbackController)
+// USER LOGOUT ------
+router.post('/logout', AuthControllers.logout);
+
+// USER PASSWORD RESET ------
+router.post('/reset-password', validateRequest(resetPasswordZodSchema), checkAuth(...Object.values(Role)), AuthControllers.resetPassword);
 
 
 export const AuthRoutes = router;
