@@ -1,5 +1,5 @@
 import z from "zod";
-import { DeliveryType, ParcelStatus, ParcelType, ServiceType } from "./parcel.interface";
+import { AgentParcelStatus, DeliveryType, ParcelStatus, ParcelType, ServiceType } from "./parcel.interface";
 import { Role } from "../user/user.interface";
 
 
@@ -155,3 +155,19 @@ export const manageParcelZodSchema = z.object({
 }, {
     message: "Need to Assign To An Agent as the Parcel is Approved"
 })
+
+
+export const agentParcelStatusZodSchema = z.object({
+    status: z
+        .enum(Object.values(AgentParcelStatus) as [string], {
+            errorMap: (issue, value) => {
+                return { message: `${value.data} is Not Acceptable Type` }
+            }
+        })
+        .optional()
+        .refine((val) => val !== undefined, { message: 'Status is Required' }),
+    location: z
+        .string({ invalid_type_error: 'Location Must Be String' })
+        .max(200, { message: "Location Cannot Exceed 200 Characters" })
+        .optional()
+});

@@ -32,6 +32,19 @@ const getAllParcels = catchAsync(async (req: Request, res: Response, next: NextF
     })
 })
 
+// GET DELIVERY HISTORY ------
+const viewHistory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user;
+    const result = await ParcelServices.viewHistory(decodedToken);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Parcels Delivery History Retrived Successfully",
+        data: result.data
+    })
+})
+
 // GET SINGLE PARCEL ------
 const getSingleParcel = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
@@ -47,8 +60,21 @@ const getSingleParcel = catchAsync(async (req: Request, res: Response, next: Nex
 
 // GET MY PARCELS ------
 const getMyParcels = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const decodedToken = req.user as JwtPayload
-    const result = await ParcelServices.getMyParcels(decodedToken.userId);
+    const decodedToken = req.user
+    const result = await ParcelServices.getMyParcels(decodedToken);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Your Parcels Retrieved Successfully",
+        data: result.data
+    })
+})
+
+// GET INCOMING PARCELS ------
+const getIncomingParcels = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user
+    const result = await ParcelServices.getIncomingParcels(decodedToken);
 
     sendResponse(res, {
         success: true,
@@ -75,9 +101,9 @@ const manageParcel = catchAsync(async (req: Request, res: Response, next: NextFu
 
 // UPDATE PARCEL-STATUS ------
 const updateParcelStatus = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params.id;
+    const parcelId = req.params.id;
     const decodedToken = req.user;
-    const result = await ParcelServices.updateParcelStatus(id, req.body, decodedToken);
+    const result = await ParcelServices.updateParcelStatus(parcelId, req.body, decodedToken);
 
     sendResponse(res, {
         success: true,
@@ -115,6 +141,19 @@ const confirmDelivery = catchAsync(async (req: Request, res: Response, next: Nex
     })
 })
 
+// TRACK THE PARCEL ------
+const trackParcel = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const trackingId = req.params.id;
+    const result = await ParcelServices.trackParcel(trackingId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Parcel Tracking History Retrived Successfully",
+        data: result.data
+    })
+})
+
 export const ParcelControllers = {
-    createParcel, getAllParcels, getMyParcels, getSingleParcel, manageParcel, updateParcelStatus, cancelParcel, confirmDelivery
+    createParcel, getAllParcels, viewHistory, getMyParcels, getIncomingParcels, getSingleParcel, manageParcel, updateParcelStatus, cancelParcel, confirmDelivery, trackParcel
 }

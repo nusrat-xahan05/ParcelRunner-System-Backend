@@ -94,6 +94,9 @@ export const updateUserZodSchema = z.object({
                 return { message: `${value.data} is Not Acceptable` }
             }
         })
+        .optional(),
+    agentStatus: z
+        .string()
         .optional()
 })
 

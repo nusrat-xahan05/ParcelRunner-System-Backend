@@ -4,7 +4,7 @@ import { IUser, Role } from "../modules/user/user.interface";
 import { User } from "../modules/user/user.model"
 import bcryptjs from "bcryptjs"
 
-export const seedAdmin = async(req: Request, res: Response, next: NextFunction) => {
+export const seedAdmin = async() => {
     try{
         const isAdminExist = await User.findOne({email: envVars.ADMIN_EMAIL});
         if(isAdminExist){
@@ -19,13 +19,11 @@ export const seedAdmin = async(req: Request, res: Response, next: NextFunction) 
             role: Role.ADMIN,
             email: envVars.ADMIN_EMAIL,
             password: hashedPassword,
-            phone: envVars.ADMIN_PHONE,
-            isVerified: true
+            phone: envVars.ADMIN_PHONE
         }
 
         await User.create(payload);
     }catch(err){
         console.log(err);
-        next(err);
     }
 }

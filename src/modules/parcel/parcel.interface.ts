@@ -24,13 +24,18 @@ export enum ParcelType {
 export enum ParcelStatus {
     REQUESTED = "REQUESTED",
     APPROVED = "APPROVED",
-    ASSIGNED = "ASSIGNED",
     DISPATCHED = "DISPATCHED",
     IN_TRANSIT = "IN TRANSIT",
     OUT_FOR_DELIVERY = "OUT FOR DELIVERY",
     DELIVERED = "DELIVERED",
     CANCELLED = "CANCELLED",
     BLOCKED = "BLOCKED"
+}
+
+export enum AgentParcelStatus {
+    DISPATCHED = "DISPATCHED",
+    IN_TRANSIT = "IN TRANSIT",
+    OUT_FOR_DELIVERY = "OUT FOR DELIVERY"
 }
 
 export interface IParcelStatusLog {
