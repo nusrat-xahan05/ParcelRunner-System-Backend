@@ -1,5 +1,5 @@
 import z from "zod";
-import { UserStatus, Role } from "./user.interface";
+import { UserStatus, Role, AgentStatus } from "./user.interface";
 
 export const createUserZodSchema = z.object({
     name: z
@@ -43,9 +43,6 @@ export const createUserZodSchema = z.object({
             }
         })
         .optional(),
-    isVerified: z
-        .boolean({ invalid_type_error: "Verified Must Be True or False" })
-        .optional(),
     role: z
         .enum(Object.values(Role) as [string], {
             errorMap: (issue, value) => {
@@ -53,7 +50,10 @@ export const createUserZodSchema = z.object({
             }
         })
         .optional()
-        .refine((val) => val !== undefined, { message: 'Role is Required' })
+        .refine((val) => val !== undefined, { message: 'Role is Required' }),
+    agentStatus: z
+        .string()
+        .optional()
 })
 
 
@@ -96,3 +96,22 @@ export const updateUserZodSchema = z.object({
         })
         .optional()
 })
+
+
+export const reviewAgentRequestZodSchema = z.object({
+    userId: z
+        .string()
+        .optional(),
+    agentStatus: z
+        .enum(Object.values(AgentStatus) as [string], {
+            errorMap: (issue, value) => {
+                return { message: `${value.data} is Not Acceptable` }
+            }
+        })
+        .optional()
+        .refine((val) => val !== undefined, { message: 'Agent Status is Required' }),
+    reviewedBy: z
+        .string()
+        .optional()
+})
+

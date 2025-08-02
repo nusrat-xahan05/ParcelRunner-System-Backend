@@ -8,7 +8,20 @@ export enum UserStatus {
 export enum Role {
     ADMIN = "ADMIN",
     SENDER = "SENDER",
-    RECEIVER = "RECEIVER"
+    RECEIVER = "RECEIVER",
+    AGENT = "AGENT"
+}
+
+export enum AgentStatus {
+    PENDING = "PENDING",
+    APPROVED = "APPROVED",
+    REJECTED = "REJECTED"
+}
+
+export interface IAgentRequest {
+    userId?: Types.ObjectId;
+    agentStatus: AgentStatus;
+    reviewedBy?: Types.ObjectId;
 }
 
 export interface IUser {
@@ -19,7 +32,6 @@ export interface IUser {
     phone: string;
     address?: string;
     userStatus?: UserStatus;
-    isVerified?: boolean;
     role: Role;
-    // parcels?: Types.ObjectId[];
+    agentStatus?: string;
 }

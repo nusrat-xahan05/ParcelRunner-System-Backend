@@ -18,6 +18,32 @@ const createUser = catchAsync(async (req: Request, res: Response, next: NextFunc
     })
 })
 
+// USER AGENT REQUEST ------
+const createAgentRequest = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user;
+    const user = await UserServices.createAgentRequest(decodedToken)
+
+    sendResponse(res, {
+        statusCode: httpStatus.CREATED,
+        success: true,
+        message: "Request To Be An Agent Created Successfully",
+        data: user,
+    })
+})
+
+// GET ALL AGENT REQUEST ------
+const GetAllAgentRequest = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const result = await UserServices.GetAllAgentRequest();
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "All Agent Request Retrieved Successfully",
+        data: result.data,
+        meta: result.meta
+    })
+})
+
 // GET ALL USERS ------ 
 const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const result = await UserServices.getAllUsers();
@@ -60,9 +86,9 @@ const getSingleUser = catchAsync(async (req: Request, res: Response, next: NextF
 // USER PROFILE UPDATE, BLOCK CAN BE DONE BY ADMIN ------
 const updateUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.params.id;
-    const verifiedToken = req.user;
+    const decodedToken = req.user;
     const payload = req.body;
-    const user = await UserServices.updateUser(userId, payload, verifiedToken as JwtPayload)
+    const user = await UserServices.updateUser(userId, payload, decodedToken)
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -72,7 +98,21 @@ const updateUser = catchAsync(async (req: Request, res: Response, next: NextFunc
     })
 })
 
+// REVIEW AGENT REQUEST ------
+const reviewAgentRequest = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const requestId = req.params.id;
+    const decodedToken = req.user;
+    const user = await UserServices.reviewAgentRequest(requestId, req.body, decodedToken)
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Agent Request Reviewed Successfully",
+        data: user,
+    })
+})
+
 
 export const UserControllers = {
-    createUser, getAllUsers, getMe, getSingleUser, updateUser
+    createUser, createAgentRequest, GetAllAgentRequest, getAllUsers, getMe, getSingleUser, updateUser, reviewAgentRequest
 }

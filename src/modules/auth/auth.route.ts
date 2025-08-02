@@ -3,13 +3,13 @@ import { AuthControllers } from "./auth.controller";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "../user/user.interface";
 import { validateRequest } from "../../middlewares/validateRequest";
-import { resetPasswordZodSchema } from "./auth.validation";
+import { loginZodSchema, resetPasswordZodSchema } from "./auth.validation";
 
 
 const router = Router()
 
 // USER LOGIN ------
-router.post('/login', AuthControllers.credentialsLogin);
+router.post('/login', validateRequest(loginZodSchema), AuthControllers.credentialsLogin);
 
 // CREATE ACCESSTOKEN FROM REFRESH TOKEN ------
 router.post('/refresh-token', checkAuth(...Object.values(Role)), AuthControllers.getNewAccessToken);

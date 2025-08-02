@@ -1,5 +1,5 @@
-import { IUser, Role } from "./user.interface";
-import { User } from "./user.model";
+import { AgentStatus, IAgentRequest, IUser, Role } from "./user.interface";
+import { AgentRequest, User } from "./user.model";
 import httpStatus from "http-status-codes"
 import bcryptjs from "bcryptjs"
 import { envVars } from "../../config/env";
@@ -15,19 +15,49 @@ const createUser = async (payload: Partial<IUser>) => {
     if (isUserExist) {
         throw new AppError(httpStatus.BAD_REQUEST, "User Already Exist with This Email");
     }
-    if (role === Role.ADMIN) {
+    if ((role !== Role.SENDER) && (role !== Role.RECEIVER)) {
         throw new AppError(httpStatus.BAD_REQUEST, "You can Only Register as 'SENDER' or 'RECEIVER'");
     }
 
     const hashedPassword = await bcryptjs.hash(password as string, Number(envVars.BCRYPT_SALT_ROUND));
-
     const user = await User.create({
         email,
         password: hashedPassword,
         role,
         ...rest
     })
-    return user
+
+    return user;
+}
+
+// USER AGENT REQUEST ------
+const createAgentRequest = async (decodedToken: JwtPayload) => {
+    const isRequestExist = await AgentRequest.findOne({ userId: decodedToken.userId });
+    if (isRequestExist) {
+        throw new AppError(httpStatus.BAD_REQUEST, "You Have Already Made A Request");
+    }
+
+    const isUserExist = await User.findById(decodedToken.userId);
+    if(isUserExist){
+        isUserExist.agentStatus! = AgentStatus.PENDING;
+        await isUserExist.save();
+    }
+
+    const result = await AgentRequest.create({ userId: decodedToken.userId });
+    return result;
+}
+
+// GET ALL AGENT REQUEST ------
+const GetAllAgentRequest = async () => {
+    const requests = await AgentRequest.find({});
+    const totalRequest = await AgentRequest.countDocuments();
+
+    return {
+        data: requests,
+        meta: {
+            total: totalRequest
+        }
+    };
 }
 
 // GET ALL USERS ------ 
@@ -70,18 +100,17 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
         throw new AppError(httpStatus.NOT_FOUND, "No User Exist With This Id");
     }
 
-    if ((decodedToken.userId !== userId) && (decodedToken.role === Role.SENDER || decodedToken.role === Role.RECEIVER)) {
+    if ((decodedToken.userId !== userId) && (decodedToken.role === Role.SENDER || decodedToken.role === Role.RECEIVER || decodedToken.role === Role.AGENT)) {
         throw new AppError(httpStatus.BAD_REQUEST, "You're not Authorized to Change Others Profile");
     }
 
-    if (payload.role || payload.userStatus || payload.isVerified) {
-        if (decodedToken.role === Role.SENDER || decodedToken.role === Role.RECEIVER) {
+    if (payload.role || payload.userStatus || payload.agentStatus) {
+        if (decodedToken.role === Role.SENDER || decodedToken.role === Role.RECEIVER || decodedToken.role === Role.AGENT) {
             throw new AppError(httpStatus.FORBIDDEN, "You're Not Authorized To Change Role, Status & Verification");
         }
     }
 
     if (payload.password) {
-        // payload.password = await bcryptjs.hash(payload.password, envVars.BCRYPT_SALT_ROUND);
         throw new AppError(httpStatus.BAD_REQUEST, "Change the Password From Reset Password");
     }
 
@@ -89,9 +118,28 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
     return newUpdateUser;
 }
 
+// REVIEW AGENT REQUEST ------
+const reviewAgentRequest = async (requestId: string, payload: Partial<IAgentRequest>, decodedToken: JwtPayload) => {
+    const isRequestExist = await AgentRequest.findById(requestId);
+    if (!isRequestExist) {
+        throw new AppError(httpStatus.NOT_FOUND, "No Request Exist With This Id");
+    }
 
+    isRequestExist.agentStatus = payload.agentStatus!;
+    isRequestExist.reviewedBy = decodedToken.userId;
+    await isRequestExist.save();
+
+    if (payload.agentStatus === AgentStatus.APPROVED) {
+        await User.findByIdAndUpdate(isRequestExist.userId, { role: Role.AGENT, agentStatus: payload.agentStatus });
+    }
+    if (payload.agentStatus === AgentStatus.REJECTED) {
+        await User.findByIdAndUpdate(isRequestExist.userId, { agentStatus: payload.agentStatus });
+    }
+
+    return isRequestExist;
+}
 
 
 export const UserServices = {
-    createUser, getAllUsers, getMe, getSingleUser, updateUser
+    createUser, createAgentRequest, GetAllAgentRequest, getAllUsers, getMe, getSingleUser, updateUser, reviewAgentRequest
 }

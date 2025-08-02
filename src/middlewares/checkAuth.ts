@@ -26,7 +26,7 @@ export const checkAuth = (...authRoles: string[]) => async (req: Request, res: R
         }
 
         if (!authRoles.includes(verifiedToken.role)) {
-            throw new AppError(httpStatus.BAD_REQUEST, "Only Admins are Allowed to View This Route");
+            throw new AppError(httpStatus.BAD_REQUEST, "You're Not Allowed To Do This Action");
         }
 
         req.user = verifiedToken;
