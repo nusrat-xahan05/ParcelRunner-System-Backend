@@ -51,12 +51,12 @@ npm install
 2. Create a `.env` file in the root and add the following:
 
 ```env
-PORT  =5000
+PORT = 5000
 DB_URL = your_mongodb_connection_string
 NODE_ENV = Development
 BCRYPT_SALT_ROUND = your_desired_round_number
 ADMIN_EMAIL = provide_email
-ADMIN_PASSWORD = make_password
+ADMIN_PASSWORD = provide_password
 ADMIN_PHONE = provide_phone_number
 JWT_ACCESS_SECRET = your_jwt_access_secret
 JWT_ACCESS_EXPIRES = -d
@@ -114,6 +114,6 @@ npm start
 
 ## 🧪 Testing
 
-Use **Postman** or **cURL** to test the endpoints. Ensure your `.env` file is properly configured with all required secrets and DB credentials.
+Use **Postman** to test the endpoints. Ensure your `.env` file is properly configured with all required secrets and DB credentials.
 
 ---
