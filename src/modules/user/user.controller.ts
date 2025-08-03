@@ -31,19 +31,6 @@ const createAgentRequest = catchAsync(async (req: Request, res: Response, next: 
     })
 })
 
-// GET ALL AGENT REQUEST ------
-const GetAllAgentRequest = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const result = await UserServices.GetAllAgentRequest();
-
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "All Agent Request Retrieved Successfully",
-        data: result.data,
-        meta: result.meta
-    })
-})
-
 // GET ALL USERS ------ 
 const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const result = await UserServices.getAllUsers();
@@ -52,6 +39,20 @@ const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFun
         statusCode: httpStatus.OK,
         success: true,
         message: "Users Retrieved Successfully",
+        data: result.data,
+        meta: result.meta
+    })
+})
+
+// GET ALL AGENT REQUEST ------
+const GetAllAgentRequest = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const query = req.query;
+    const result = await UserServices.GetAllAgentRequest(query as Record<string, string>);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "All Agent Request Retrieved Successfully",
         data: result.data,
         meta: result.meta
     })

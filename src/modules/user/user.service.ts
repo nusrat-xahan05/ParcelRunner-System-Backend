@@ -47,19 +47,6 @@ const createAgentRequest = async (decodedToken: JwtPayload) => {
     return result;
 }
 
-// GET ALL AGENT REQUEST ------
-const GetAllAgentRequest = async () => {
-    const requests = await AgentRequest.find({});
-    const totalRequest = await AgentRequest.countDocuments();
-
-    return {
-        data: requests,
-        meta: {
-            total: totalRequest
-        }
-    };
-}
-
 // GET ALL USERS ------ 
 const getAllUsers = async () => {
     const users = await User.find({});
@@ -69,6 +56,20 @@ const getAllUsers = async () => {
         data: users,
         meta: {
             total: totalUsers
+        }
+    };
+}
+
+// GET ALL AGENT REQUEST ------
+const GetAllAgentRequest = async (query: Record<string, string>) => {
+    const filter = query;
+    const requests = await AgentRequest.find(filter).populate('userId');
+    const totalRequest = await AgentRequest.countDocuments();
+
+    return {
+        data: requests,
+        meta: {
+            total: totalRequest
         }
     };
 }
@@ -123,6 +124,9 @@ const reviewAgentRequest = async (requestId: string, payload: Partial<IAgentRequ
     const isRequestExist = await AgentRequest.findById(requestId);
     if (!isRequestExist) {
         throw new AppError(httpStatus.NOT_FOUND, "No Request Exist With This Id");
+    }
+    if (isRequestExist.agentStatus === payload.agentStatus) {
+        throw new AppError(httpStatus.NOT_FOUND, `Agent Status is Already In ${isRequestExist.agentStatus}`);
     }
 
     isRequestExist.agentStatus = payload.agentStatus!;

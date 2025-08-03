@@ -28,8 +28,9 @@ const createParcel = async (payload: Partial<IParcel>, decodedToken: JwtPayload)
 }
 
 // GET ALL PARCELS ------
-const getAllParcels = async () => {
-    const parcels = await Parcel.find({});
+const getAllParcels = async (query: Record<string, string>) => {
+    const filter = query;
+    const parcels = await Parcel.find(filter);
     const totalParcels = await Parcel.countDocuments();
 
     return {
@@ -39,27 +40,6 @@ const getAllParcels = async () => {
         }
     };
 }
-
-// GET DELIVERY HISTORY ------
-const viewHistory = async (decodedToken: JwtPayload) => {
-    const parcels = await Parcel.find({ receiverEmail: decodedToken.email, currentStatus: ParcelStatus.DELIVERED }).select('trackingId senderEmail receiverEmail parcelType codAmount currentStatus');
-
-    return {
-        data: parcels
-    };
-}
-
-// GET SINGLE PARCEL ------
-const getSingleParcel = async (id: string) => {
-    const isParcelExist = await Parcel.findById(id);
-    if (!isParcelExist) {
-        throw new AppError(httpStatus.BAD_REQUEST, "No Parcel Exist With This Id");
-    }
-
-    return {
-        data: isParcelExist
-    }
-};
 
 // GET MY PARCELS ------
 const getMyParcels = async (decodedToken: JwtPayload) => {
@@ -76,6 +56,27 @@ const getIncomingParcels = async (decodedToken: JwtPayload) => {
 
     return {
         data: parcels
+    }
+};
+
+// GET DELIVERY HISTORY ------
+const viewHistory = async (decodedToken: JwtPayload) => {
+    let parcels = await Parcel.find({ receiverEmail: decodedToken.email, currentStatus: ParcelStatus.DELIVERED }).select('trackingId senderEmail receiverEmail parcelType codAmount currentStatus');
+
+    return {
+        data: parcels
+    };
+}
+
+// GET SINGLE PARCEL ------
+const getSingleParcel = async (id: string) => {
+    const isParcelExist = await Parcel.findById(id);
+    if (!isParcelExist) {
+        throw new AppError(httpStatus.BAD_REQUEST, "No Parcel Exist With This Id");
+    }
+
+    return {
+        data: isParcelExist
     }
 };
 
@@ -107,7 +108,7 @@ const manageParcel = async (parcelId: string, payload: Partial<IParcel>, decoded
         }
         else {
             throw new AppError(httpStatus.BAD_REQUEST, `Cannot ${payload.currentStatus}. Parcel is Already ${isParcelExist.currentStatus}`);
-        } //--------------------------- extra save check koro
+        }
         isParcelExist.parcelStatusLog.push({
             status: isParcelExist.currentStatus,
             updatedBy: decodedToken.role,
@@ -131,6 +132,32 @@ const manageParcel = async (parcelId: string, payload: Partial<IParcel>, decoded
     }
 };
 
+// TRACK THE PARCEL ------
+const trackParcel = async (trackingId: string) => {
+    const isParcelExist = await Parcel.findOne({trackingId});
+    if (!isParcelExist) {
+        throw new AppError(httpStatus.BAD_REQUEST, "No Parcel Exist With This Tracking Id");
+    }
+
+    const senderInfo = await User.findOne({email: isParcelExist.senderEmail});
+
+    const result = {
+        trackingId: isParcelExist.trackingId,
+        currentStatus: isParcelExist.currentStatus,
+        parcelStatusLog: isParcelExist.parcelStatusLog,
+        senderName: senderInfo!.name,
+        senderEmail: senderInfo?.email,
+        senderPhone: senderInfo?.phone,
+        receiverName: isParcelExist.receiverName,
+        receiverEmail: isParcelExist.receiverEmail,
+        receiverPhone: isParcelExist.receiverPhone
+    }
+
+    return {
+        data: result
+    }
+};
+
 // UPDATE PARCEL-STATUS ------
 const updateParcelStatus = async (parcelId: string, payload: Partial<IParcelStatusLog>, decodedToken: JwtPayload) => {
     const isParcelExist = await Parcel.findById(parcelId);
@@ -138,7 +165,7 @@ const updateParcelStatus = async (parcelId: string, payload: Partial<IParcelStat
         throw new AppError(httpStatus.BAD_REQUEST, "No Parcel Exist With This Id");
     }
 
-    if (isParcelExist.agentId!.toString() !== decodedToken.userId) {
+    if ((!isParcelExist.agentId) || (isParcelExist.agentId!.toString() !== decodedToken.userId)) {
         throw new AppError(httpStatus.BAD_REQUEST, "You're Not Assigned For This Parcel");
     }
 
@@ -197,7 +224,7 @@ const cancelParcel = async (parcelId: string, decodedToken: JwtPayload) => {
 
 // CONFIRM PARCEL DELIVERY ------
 const confirmDelivery = async (parcelId: string, decodedToken: JwtPayload) => {
-    const isParcelExist = await Parcel.findById(parcelId);
+    const isParcelExist = await Parcel.findById(parcelId).select('trackingId senderEmail receiverEmail parcelStatusLog parcelType codAmount currentStatus');
     if (!isParcelExist) {
         throw new AppError(httpStatus.BAD_REQUEST, "No Parcel Exist With This Id");
     }
@@ -216,32 +243,6 @@ const confirmDelivery = async (parcelId: string, decodedToken: JwtPayload) => {
 
     return {
         data: isParcelExist
-    }
-};
-
-// TRACK THE PARCEL ------
-const trackParcel = async (trackingId: string) => {
-    const isParcelExist = await Parcel.findOne({trackingId});
-    if (!isParcelExist) {
-        throw new AppError(httpStatus.BAD_REQUEST, "No Parcel Exist With This Tracking Id");
-    }
-
-    const senderInfo = await User.findOne({email: isParcelExist.senderEmail});
-
-    const result = {
-        trackingId: isParcelExist.trackingId,
-        currentStatus: isParcelExist.currentStatus,
-        parcelStatusLog: isParcelExist.parcelStatusLog,
-        senderName: senderInfo!.name,
-        senderEmail: senderInfo?.email,
-        senderPhone: senderInfo?.phone,
-        receiverName: isParcelExist.receiverName,
-        receiverEmail: isParcelExist.receiverEmail,
-        receiverPhone: isParcelExist.receiverPhone
-    }
-
-    return {
-        data: result
     }
 };
 

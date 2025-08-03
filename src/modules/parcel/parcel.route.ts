@@ -43,5 +43,4 @@ router.patch('/confirm-delivery/:id', checkAuth(Role.RECEIVER), ParcelController
 
 
 
-
 export const ParcelRoutes = router;

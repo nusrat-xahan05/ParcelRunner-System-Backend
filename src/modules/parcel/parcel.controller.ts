@@ -21,7 +21,8 @@ const createParcel = catchAsync(async (req: Request, res: Response, next: NextFu
 
 // GET ALL PARCELS ------
 const getAllParcels = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const result = await ParcelServices.getAllParcels();
+    const query = req.query;
+    const result = await ParcelServices.getAllParcels(query as Record<string, string>);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -29,32 +30,6 @@ const getAllParcels = catchAsync(async (req: Request, res: Response, next: NextF
         message: "Parcels Retrieved Successfully",
         data: result.data,
         meta: result.meta
-    })
-})
-
-// GET DELIVERY HISTORY ------
-const viewHistory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const decodedToken = req.user;
-    const result = await ParcelServices.viewHistory(decodedToken);
-
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "Parcels Delivery History Retrived Successfully",
-        data: result.data
-    })
-})
-
-// GET SINGLE PARCEL ------
-const getSingleParcel = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params.id;
-    const result = await ParcelServices.getSingleParcel(id);
-
-    sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.OK,
-        message: "Parcel Retrieved Successfully",
-        data: result.data
     })
 })
 
@@ -84,17 +59,55 @@ const getIncomingParcels = catchAsync(async (req: Request, res: Response, next: 
     })
 })
 
+// GET DELIVERY HISTORY ------
+const viewHistory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user;
+    const result = await ParcelServices.viewHistory(decodedToken);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Parcels Delivered History Retrived Successfully",
+        data: result.data
+    })
+})
+
+// GET SINGLE PARCEL ------
+const getSingleParcel = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const result = await ParcelServices.getSingleParcel(id);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Parcel Retrieved Successfully",
+        data: result.data
+    })
+})
+
 // MANAGE PARCEL ------
 const manageParcel = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const parcelId = req.params.id;
     const decodedToken = req.user;
-    const payload = req.body;
-    const result = await ParcelServices.manageParcel(parcelId, payload, decodedToken);
+    const result = await ParcelServices.manageParcel(parcelId, req.body, decodedToken);
 
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,
         message: "Parcel Updated Successfully",
+        data: result.data
+    })
+})
+
+// TRACK THE PARCEL ------
+const trackParcel = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const trackingId = req.params.id;
+    const result = await ParcelServices.trackParcel(trackingId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Parcel Tracking History Retrived Successfully",
         data: result.data
     })
 })
@@ -137,19 +150,6 @@ const confirmDelivery = catchAsync(async (req: Request, res: Response, next: Nex
         success: true,
         statusCode: httpStatus.OK,
         message: "Parcel Is Delivered Successfully",
-        data: result.data
-    })
-})
-
-// TRACK THE PARCEL ------
-const trackParcel = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const trackingId = req.params.id;
-    const result = await ParcelServices.trackParcel(trackingId);
-
-    sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.OK,
-        message: "Parcel Tracking History Retrived Successfully",
         data: result.data
     })
 })
