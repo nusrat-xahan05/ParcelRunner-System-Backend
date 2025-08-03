@@ -48,8 +48,9 @@ const createAgentRequest = async (decodedToken: JwtPayload) => {
 }
 
 // GET ALL USERS ------ 
-const getAllUsers = async () => {
-    const users = await User.find({});
+const getAllUsers = async (query: Record<string, string>) => {
+    const filter = query;
+    const users = await User.find(filter);
     const totalUsers = await User.countDocuments();
 
     return {
